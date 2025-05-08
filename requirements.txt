@@ -1,6 +1,4 @@
 flask
-torch==2.0.1
-torchvision
-opencv-python
 numpy
 gdown
+opencv-python-headless

@@ -1,4 +1,4 @@
 flask
-numpy
+numpy<2
 gdown
 opencv-python-headless

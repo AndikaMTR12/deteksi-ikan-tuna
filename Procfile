@@ -1,1 +1,1 @@
-web: python app.py
+web: bash -c "./install.sh && python app.py"

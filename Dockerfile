@@ -2,26 +2,23 @@ FROM python:3.10-slim
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
+    git \
+    curl \
     libgl1-mesa-glx \
     libglib2.0-0 \
-    git \
     && rm -rf /var/lib/apt/lists/*
 
-# Set workdir
 WORKDIR /app
 
-# Install Python dependencies
+# Install Python dependencies early to leverage cache
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --upgrade pip && pip install -r requirements.txt
 
-# Install Detectron2 (pastikan torch sudah terinstall)
+# Install detectron2 after torch
 RUN pip install 'git+https://github.com/facebookresearch/detectron2.git'
 
-# Copy app code
+# Copy app files
 COPY . .
 
-# Expose port
-EXPOSE 5000
-
-# Command to run app
+# Run the app
 CMD ["python", "app.py"]

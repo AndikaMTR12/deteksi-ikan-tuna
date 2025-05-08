@@ -11,6 +11,8 @@ from detectron2.config import get_cfg
 from detectron2.data import MetadataCatalog
 from detectron2 import model_zoo
 
+import gdown_download 
+
 # Flask setup
 app = Flask(__name__)
 
@@ -18,21 +20,8 @@ app = Flask(__name__)
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# ✅ ID Google Drive
-MODEL_URL = "https://drive.google.com/file/d/1NqsaKb6WpvzbTdrZPK3lELgkpH9pm_Pg/view?usp=sharing"  # Ganti dengan ID model_final.pth kamu
-ANNOTATION_URL = "https://drive.google.com/file/d/1NVF-CMGa8FfZUYYFITUusSC8JgToOnIO/view?usp=sharing"  # Ganti dengan ID annotation JSON kamu
-
 MODEL_PATH = "model_final.pth"
 ANNOTATION_PATH = "annotations_coco_resized.json"
-
-# ✅ Download model dan anotasi jika belum ada
-if not os.path.exists(MODEL_PATH):
-    print("⬇️ Mengunduh model dari Google Drive...")
-    gdown.download(MODEL_URL, MODEL_PATH, quiet=False)
-
-if not os.path.exists(ANNOTATION_PATH):
-    print("⬇️ Mengunduh anotasi dari Google Drive...")
-    gdown.download(ANNOTATION_URL, ANNOTATION_PATH, quiet=False)
 
 # ✅ Load anotasi
 with open(ANNOTATION_PATH, "r") as f:

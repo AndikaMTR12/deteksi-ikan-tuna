@@ -1,19 +1,7 @@
 flask
-gunicorn
-torch>=1.10.0
-gdown
+torch
 torchvision
 opencv-python
 numpy
-werkzeug
-pyyaml==5.1
-Pillow
-termcolor
-matplotlib
-fvcore
-iopath
-tqdm
-yacs
-cloudpickle
+gdown
 detectron2 @ git+https://github.com/facebookresearch/detectron2.git
-

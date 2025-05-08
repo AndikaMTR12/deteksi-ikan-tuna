@@ -3,6 +3,7 @@ import json
 import cv2
 import torch
 import numpy as np
+import gdown
 from flask import Flask, request, jsonify
 from werkzeug.utils import secure_filename
 from detectron2.engine import DefaultPredictor
@@ -10,34 +11,49 @@ from detectron2.config import get_cfg
 from detectron2.data import MetadataCatalog
 from detectron2 import model_zoo
 
+# Flask setup
 app = Flask(__name__)
 
-# Path lokal (dalam container)
+# Direktori upload
 UPLOAD_FOLDER = "uploads"
-ANNOTATION_PATH = "annotations_coco_resized.json"
-MODEL_PATH = "model_final.pth"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# Load ukuran gambar dari anotasi
+# ✅ ID Google Drive
+MODEL_URL = "https://drive.google.com/uc?id=1ABCDXYZ"  # Ganti dengan ID model_final.pth kamu
+ANNOTATION_URL = "https://drive.google.com/uc?id=1WXYZABC"  # Ganti dengan ID annotation JSON kamu
+
+MODEL_PATH = "model_final.pth"
+ANNOTATION_PATH = "annotations_coco_resized.json"
+
+# ✅ Download model dan anotasi jika belum ada
+if not os.path.exists(MODEL_PATH):
+    print("⬇️ Mengunduh model dari Google Drive...")
+    gdown.download(MODEL_URL, MODEL_PATH, quiet=False)
+
+if not os.path.exists(ANNOTATION_PATH):
+    print("⬇️ Mengunduh anotasi dari Google Drive...")
+    gdown.download(ANNOTATION_URL, ANNOTATION_PATH, quiet=False)
+
+# ✅ Load anotasi
 with open(ANNOTATION_PATH, "r") as f:
     annotations = json.load(f)
 
 image_sizes = {img["file_name"]: (img["width"], img["height"]) for img in annotations["images"]}
 
-# Setup config detectron2
+# ✅ Konfigurasi Detectron2
 cfg = get_cfg()
 cfg.merge_from_file(model_zoo.get_config_file("COCO-Detection/faster_rcnn_R_50_FPN_3x.yaml"))
 cfg.MODEL.WEIGHTS = MODEL_PATH
 cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.5
 cfg.MODEL.ROI_HEADS.NUM_CLASSES = 2
-cfg.MODEL.DEVICE = "cpu"
+cfg.MODEL.DEVICE = "cpu"  # Ubah ke "cuda" jika pakai GPU
 
-# Label kelas
 MetadataCatalog.get("tuna_dataset").thing_classes = ["ikan_tuna_segar", "ikan_tuna_tidak_segar"]
 class_labels = MetadataCatalog.get("tuna_dataset").thing_classes
 
 predictor = DefaultPredictor(cfg)
 
+# ✅ Resize image
 def resize_image(image_path):
     if not image_sizes:
         return image_path
@@ -52,7 +68,7 @@ def resize_image(image_path):
 
 @app.route("/")
 def home():
-    return "<h1>API Deteksi Ikan Tuna (Render)</h1>"
+    return "<h1>API Deteksi Ikan Tuna (Render/Railway)</h1>"
 
 @app.route("/predict", methods=["POST"])
 def predict():

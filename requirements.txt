@@ -1,6 +1,7 @@
 flask
 gunicorn
 torch>=1.10.0
+gdown
 torchvision
 opencv-python
 numpy

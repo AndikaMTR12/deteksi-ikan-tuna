@@ -11,17 +11,19 @@ from detectron2.data import MetadataCatalog
 from detectron2 import model_zoo
 import gdown
 
-# Flask setup
+# --- Flask setup ---
 app = Flask(__name__)
 os.environ["PYTHONUNBUFFERED"] = "1"
 
 UPLOAD_FOLDER = "uploads"
+DATA_FOLDER = "/data"  # Railway volume mount path
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(DATA_FOLDER, exist_ok=True)  # Fix: make sure /data exists
 
-MODEL_PATH = "/data/model_final.pth"
-ANNOTATION_PATH = "/data/annotations_coco_resized.json"
+MODEL_PATH = os.path.join(DATA_FOLDER, "model_final.pth")
+ANNOTATION_PATH = os.path.join(DATA_FOLDER, "annotations_coco_resized.json")
 
-# ✅ Fungsi untuk download file jika belum ada
+# --- Download helper ---
 def download_if_not_exists(url, output):
     if not os.path.exists(output):
         print(f"⬇️ Downloading {output} ...")
@@ -29,7 +31,7 @@ def download_if_not_exists(url, output):
     else:
         print(f"✅ File {output} sudah ada")
 
-# ✅ Resize image
+# --- Image resize ---
 def resize_image(image_path, image_sizes):
     if not image_sizes:
         return image_path
@@ -42,10 +44,12 @@ def resize_image(image_path, image_sizes):
     cv2.imwrite(resized_path, resized)
     return resized_path
 
+# --- Route: homepage ---
 @app.route("/")
 def home():
     return "<h1>API Deteksi Ikan Tuna (Railway)</h1>"
 
+# --- Route: prediction ---
 @app.route("/predict", methods=["POST"])
 def predict():
     if "image" not in request.files:
@@ -79,7 +83,7 @@ def predict():
     os.remove(resized_path)
     return jsonify({"predictions": results, "message": "Deteksi selesai"})
 
-# ✅ Bagian utama untuk setup dan run
+# --- App init ---
 if __name__ == "__main__":
     print("📥 Download model")
     download_if_not_exists("https://drive.google.com/uc?id=1NqsaKb6WpvzbTdrZPK3lELgkpH9pm_Pg", MODEL_PATH)

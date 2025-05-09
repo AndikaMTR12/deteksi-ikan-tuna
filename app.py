@@ -18,8 +18,8 @@ os.environ["PYTHONUNBUFFERED"] = "1"
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-MODEL_PATH = "model_final.pth"
-ANNOTATION_PATH = "annotations_coco_resized.json"
+MODEL_PATH = "/data/model_final.pth"
+ANNOTATION_PATH = "/data/annotations_coco_resized.json"
 
 # ✅ Fungsi untuk download file jika belum ada
 def download_if_not_exists(url, output):

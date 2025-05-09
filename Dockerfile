@@ -30,4 +30,5 @@ RUN pip install git+https://github.com/facebookresearch/detectron2.git@main
 COPY . .
 
 # Jalankan aplikasi Flask
-CMD ["python", "app.py"]
+CMD ["python", "-u", "app.py"]
+

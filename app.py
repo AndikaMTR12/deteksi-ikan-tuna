@@ -16,6 +16,8 @@ import gdown_download
 # Flask setup
 app = Flask(__name__)
 
+os.environ["PYTHONUNBUFFERED"] = "1"
+
 # Direktori upload
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)

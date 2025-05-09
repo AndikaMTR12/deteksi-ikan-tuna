@@ -18,7 +18,13 @@ os.environ["PYTHONUNBUFFERED"] = "1"
 UPLOAD_FOLDER = "uploads"
 DATA_FOLDER = "/data"  # Railway volume mount path
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-os.makedirs(DATA_FOLDER, exist_ok=True)  # Fix: make sure /data exists
+
+# --- Ensure /data exists (volume check) ---
+if not os.path.exists(DATA_FOLDER):
+    print("❌ Folder /data tidak tersedia. Pastikan volume di Railway sudah dikonfigurasi.")
+    exit(1)
+
+os.makedirs(DATA_FOLDER, exist_ok=True)
 
 MODEL_PATH = os.path.join(DATA_FOLDER, "model_final.pth")
 ANNOTATION_PATH = os.path.join(DATA_FOLDER, "annotations_coco_resized.json")
@@ -27,7 +33,11 @@ ANNOTATION_PATH = os.path.join(DATA_FOLDER, "annotations_coco_resized.json")
 def download_if_not_exists(url, output):
     if not os.path.exists(output):
         print(f"⬇️ Downloading {output} ...")
-        gdown.download(url, output, quiet=False)
+        try:
+            gdown.download(url, output, quiet=False, fuzzy=True)
+        except Exception as e:
+            print(f"❌ Gagal download file {output}: {e}")
+            exit(1)
     else:
         print(f"✅ File {output} sudah ada")
 
@@ -92,8 +102,12 @@ if __name__ == "__main__":
     download_if_not_exists("https://drive.google.com/uc?id=1NVF-CMGa8FfZUYYFITUusSC8JgToOnIO", ANNOTATION_PATH)
 
     print("📖 Loading annotation JSON")
-    with open(ANNOTATION_PATH, "r") as f:
-        annotations = json.load(f)
+    try:
+        with open(ANNOTATION_PATH, "r") as f:
+            annotations = json.load(f)
+    except Exception as e:
+        print(f"❌ Gagal membuka annotation JSON: {e}")
+        exit(1)
 
     print("📏 Creating image_sizes map")
     image_sizes = {img["file_name"]: (img["width"], img["height"]) for img in annotations["images"]}
@@ -116,7 +130,7 @@ if __name__ == "__main__":
     try:
         predictor = DefaultPredictor(cfg)
     except Exception as e:
-        print("❌ Gagal membuat predictor:", e)
+        print(f"❌ Gagal membuat predictor: {e}")
         exit(1)
 
     print("🚀 Starting Flask server...")
